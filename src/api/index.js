@@ -7,6 +7,21 @@ const MAX_TITLE_LENGTH = 200;
 
 app.use(express.json());
 
+// Validates a task title. Returns { value } (trimmed) or { error }.
+function validateTitle(title) {
+  if (typeof title !== 'string') {
+    return { error: 'title is required and must be a string' };
+  }
+  const trimmed = title.trim();
+  if (trimmed.length === 0) {
+    return { error: 'title must not be empty' };
+  }
+  if (trimmed.length > MAX_TITLE_LENGTH) {
+    return { error: `title must be at most ${MAX_TITLE_LENGTH} characters` };
+  }
+  return { value: trimmed };
+}
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
@@ -20,18 +35,8 @@ app.get('/tasks', async (_req, res) => {
 // POST /tasks — create a task
 app.post('/tasks', async (req, res) => {
   const { title } = req.body || {};
-  if (typeof title !== 'string') {
-    return res.status(400).json({ error: 'title is required and must be a string' });
-  }
-  const trimmedTitle = title.trim();
-  if (trimmedTitle.length === 0) {
-    return res.status(400).json({ error: 'title must not be empty' });
-  }
-  if (trimmedTitle.length > MAX_TITLE_LENGTH) {
-    return res
-      .status(400)
-      .json({ error: `title must be at most ${MAX_TITLE_LENGTH} characters` });
-  }
+  const { error, value: trimmedTitle } = validateTitle(title);
+  if (error) return res.status(400).json({ error });
   const { rows } = await db.query(
     'INSERT INTO tasks (title) VALUES ($1) RETURNING *',
     [trimmedTitle]
@@ -42,14 +47,21 @@ app.post('/tasks', async (req, res) => {
 // PATCH /tasks/:id — update a task (complete/uncomplete or rename)
 app.patch('/tasks/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const { completed, title } = req.body;
+  const { completed, title } = req.body || {};
+
+  let validatedTitle;
+  if (title !== undefined) {
+    const result = validateTitle(title);
+    if (result.error) return res.status(400).json({ error: result.error });
+    validatedTitle = result.value;
+  }
 
   const { rows } = await db.query('SELECT * FROM tasks WHERE id = $1', [id]);
   if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
 
   const current = rows[0];
   const newCompleted = completed !== undefined ? Boolean(completed) : current.completed;
-  const newTitle = title !== undefined ? title.trim() : current.title;
+  const newTitle = validatedTitle !== undefined ? validatedTitle : current.title;
 
   const { rows: updated } = await db.query(
     'UPDATE tasks SET completed = $1, title = $2 WHERE id = $3 RETURNING *',
