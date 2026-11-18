@@ -66,6 +66,22 @@ The API is not exposed directly, but you can reach it through the web container 
 | POST | `/tasks` | Create a task (`{ "title": "..." }`) |
 | PATCH | `/tasks/:id` | Update a task (`{ "completed": true }` or `{ "title": "..." }`) |
 
+### Health check
+
+The API exposes a simple endpoint to verify the service is running:
+
+```bash
+curl http://localhost:3001/health
+```
+
+Response (HTTP 200):
+
+```json
+{ "status": "ok" }
+```
+
+This only confirms the API process is up; it does not check database connectivity. Use the task endpoints (e.g. `GET /tasks`) to verify the full stack. Since the API port is not exposed to the host by default, map port 3001 first (see above) or run the command from inside the Docker network.
+
 ## Project structure
 
 ```
