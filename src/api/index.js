@@ -10,6 +10,17 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+// GET /health/db — readiness check: verifies database connectivity
+app.get('/health/db', async (_req, res) => {
+  try {
+    await db.query('SELECT 1');
+    res.status(200).json({ db: 'ok' });
+  } catch (err) {
+    console.error('Database health check failed:', err.message);
+    res.status(503).json({ db: 'down' });
+  }
+});
+
 // GET /tasks — list all tasks
 app.get('/tasks', async (_req, res) => {
   const { rows } = await db.query('SELECT * FROM tasks ORDER BY created_at ASC');
