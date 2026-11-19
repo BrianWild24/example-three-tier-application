@@ -6,8 +6,18 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+// GET /health — reports API status and database connectivity
+app.get('/health', async (_req, res) => {
+  try {
+    await db.query('SELECT 1');
+    res.json({ status: 'ok', database: 'connected' });
+  } catch (err) {
+    res.status(503).json({
+      status: 'degraded',
+      database: 'disconnected',
+      error: err.message || 'database unreachable',
+    });
+  }
 });
 
 // GET /tasks — list all tasks

@@ -61,7 +61,7 @@ The API is not exposed directly, but you can reach it through the web container 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/health` | Health check |
+| GET | `/health` | Health check; verifies database connectivity (200 `{ status: "ok", database: "connected" }`, or 503 `{ status: "degraded", database: "disconnected", error }`) |
 | GET | `/tasks` | List all tasks |
 | POST | `/tasks` | Create a task (`{ "title": "..." }`) |
 | PATCH | `/tasks/:id` | Update a task (`{ "completed": true }` or `{ "title": "..." }`) |
