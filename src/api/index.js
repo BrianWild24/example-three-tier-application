@@ -10,9 +10,9 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// GET /tasks — list all tasks
+// GET /tasks — list all tasks, newest first
 app.get('/tasks', async (_req, res) => {
-  const { rows } = await db.query('SELECT * FROM tasks ORDER BY created_at ASC');
+  const { rows } = await db.query('SELECT * FROM tasks ORDER BY created_at DESC');
   res.json(rows);
 });
 
