@@ -6,8 +6,13 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (_req, res) => {
+  try {
+    await db.query('SELECT 1');
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    res.status(503).json({ status: 'error', message: 'Database connection failed' });
+  }
 });
 
 // GET /tasks — list all tasks
