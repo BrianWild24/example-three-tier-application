@@ -16,6 +16,17 @@ app.get('/tasks', async (_req, res) => {
   res.json(rows);
 });
 
+// GET /tasks/:id — fetch a single task
+app.get('/tasks/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) return res.status(404).json({ error: 'Not found' });
+
+  const { rows } = await db.query('SELECT * FROM tasks WHERE id = $1', [id]);
+  if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+
+  res.json(rows[0]);
+});
+
 // POST /tasks — create a task
 app.post('/tasks', async (req, res) => {
   const { title } = req.body;
