@@ -34,6 +34,12 @@ app.patch('/tasks/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { completed, title } = req.body;
 
+  if (title !== undefined) {
+    if (typeof title !== 'string' || !title.trim() || title.trim().length > 200) {
+      return res.status(400).json({ error: 'title must be a non-empty string of at most 200 characters' });
+    }
+  }
+
   const { rows } = await db.query('SELECT * FROM tasks WHERE id = $1', [id]);
   if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
 
