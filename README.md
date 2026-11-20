@@ -2,7 +2,7 @@
 
 A reference implementation of a three-tier web application: a Next.js frontend, an Express REST API, and a PostgreSQL database. It runs locally with Docker Compose and deploys to Google Cloud Platform (Cloud Run + Cloud SQL) via Terraform.
 
-Last updated: 2024-01-24
+Last updated: 2026-11-20 15:48:25
 
 ## Architecture
 
